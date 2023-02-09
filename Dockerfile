@@ -8,10 +8,8 @@ ENV WORKDIR $HOME/TeamSpeak5
 # Windows: -e DISPLAY=host.docker.internal:0.0
 # Linux: --net=host -e DISPLAY=:0.0
 # MacOS: -e DISPLAY=docker.for.mac.host.internal:0.0
-ENV DISPLAY "null"
-
-# Expose Port for X11 Server.
-EXPOSE 5900/tcp
+ENV DISPLAY host.docker.internal:0.0
+ENV BUILD true
 
 # Set Non Interactive Shell Mode.
 ENV DEBIAN_FRONTEND noninteractive
@@ -37,8 +35,8 @@ WORKDIR $WORKDIR
 # Create Workdir Directory.
 RUN /bin/mkdir -p $WORKDIR
 
-# Create new Volume for TeamSpeak Directory.
-#VOLUME $WORKDIR
+# Copy Start Script into Workdir.
+COPY ./start.sh $WORKDIR
 
 # Print Debug Message.
 RUN echo ">> Installing WGET Application."
@@ -107,5 +105,8 @@ RUN echo "DISPLAY=$DISPLAY"
 # Print Debug Message.
 RUN echo ">> Starting TeamSpeak5 Client."
 
-# Run TeamSpeak5 if Display is not null (Building Process).
-RUN if [ "$DISPLAY" = "null" ] ; then echo ">> Eventually running Build, don't forget Display ENV on start!" ; else ./TeamSpeak ; fi
+# Create new Volume for TeamSpeak Default Profile.
+VOLUME /usr/local/.config/TeamSpeak/Default
+
+# Run Start Script (Inline IF not worked, planned to create Install Script later).
+ENTRYPOINT $WORKDIR/start.sh
